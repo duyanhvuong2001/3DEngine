@@ -1,6 +1,7 @@
 
 #include "SwapChain.h"
 #include "GraphicsEngine.h"
+
 SwapChain::SwapChain()
 {
 }
@@ -33,6 +34,21 @@ bool SwapChain::Init(HWND hwnd, UINT width, UINT height)
 		return false;
 	}
 
+	ID3D11Texture2D* buffer = NULL;
+
+	res = m_swap_chain->GetBuffer(0, __uuidof(ID3D11Texture2D), (void**)&buffer);
+
+	if (FAILED(res)) {
+		
+		return false;
+	}
+
+	res = device->CreateRenderTargetView(buffer, NULL, &m_render_target_view);
+
+	if (FAILED(res)) {
+		
+		return false;
+	}
 
 	return true;
 }
@@ -41,6 +57,13 @@ bool SwapChain::Release()
 {
 	m_swap_chain->Release();
 	delete this;
+	return true;
+}
+
+bool SwapChain::Present(bool vsync)
+{
+	m_swap_chain->Present(vsync, NULL);
+
 	return true;
 }
 

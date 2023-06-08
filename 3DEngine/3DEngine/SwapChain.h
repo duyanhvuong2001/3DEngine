@@ -1,5 +1,6 @@
 #pragma once
 #include <d3d11.h>
+class DeviceContext;
 class SwapChain
 {
 public:
@@ -10,8 +11,12 @@ public:
 	//Release Swap Chain
 	bool Release();
 
+	bool Present(bool vsync);
+
 	~SwapChain();
 private:
 	IDXGISwapChain* m_swap_chain;
+	ID3D11RenderTargetView* m_render_target_view;
+	friend class DeviceContext;
 };
 
