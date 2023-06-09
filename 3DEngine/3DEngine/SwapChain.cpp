@@ -34,6 +34,7 @@ bool SwapChain::Init(HWND hwnd, UINT width, UINT height)
 		return false;
 	}
 
+	//Get the back buffer color & create its render target view
 	ID3D11Texture2D* buffer = NULL;
 
 	res = m_swap_chain->GetBuffer(0, __uuidof(ID3D11Texture2D), (void**)&buffer);

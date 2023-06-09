@@ -3,6 +3,7 @@
 #include "DeviceContext.h"
 
 class SwapChain;
+class VertexBuffer;
 
 class GraphicsEngine
 {
@@ -29,6 +30,7 @@ private:
 	IDXGIFactory* m_dxgi_factory;
 private:
 	friend class SwapChain;
+	friend class VertexBuffer;
 private:
 	DeviceContext* m_imm_device_context;
 };
