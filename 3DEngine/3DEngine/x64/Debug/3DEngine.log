@@ -1,2 +1,3 @@
-﻿  AppWindow.cpp
-  3DEngine.vcxproj -> E:\C++\3DEngine\3DEngine\x64\Debug\3DEngine.exe
+﻿FXC : error X3501: 'main': entrypoint not found
+  
+  compilation failed; no code produced
