@@ -23,6 +23,7 @@ bool GraphicsEngine::Init()
 		D3D_DRIVER_TYPE_WARP,
 		D3D_DRIVER_TYPE_REFERENCE
 	};
+
 	UINT num_driver_types = ARRAYSIZE(driver_types);
 
 	D3D_FEATURE_LEVEL feature_levels[] = {

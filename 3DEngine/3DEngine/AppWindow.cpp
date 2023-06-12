@@ -33,8 +33,10 @@ void AppWindow::OnCreate()
 	Vertex vertex_list[] = 
 	{
 		{-0.5f,-0.5f,0.0f}, //POS 1
-		{0.0f,0.5f,0.0f}, //POS 2
+		{-0.5f,0.5f,0.0f}, //POS 2
 		{0.5f,-0.5f,0.0f}, //POS 3
+		
+		{0.5f,0.5f,0.0f}, //POS 4
 		
 		
 	};
@@ -69,7 +71,7 @@ void AppWindow::OnUpdate()
 	GraphicsEngine::GetInstance()->GetImmediateDeviceContext()->SetVertexBuffer(m_vertex_buffer);
 
 	// FINALLY DRAW THE TRIANGLE
-	GraphicsEngine::GetInstance()->GetImmediateDeviceContext()->DrawTriangleList(m_vertex_buffer->GetSizeVertexList(), 0);
+	GraphicsEngine::GetInstance()->GetImmediateDeviceContext()->DrawTriangleStrip(m_vertex_buffer->GetSizeVertexList(), 0);
 	m_swap_chain->Present(true);
 }
 
