@@ -51,9 +51,15 @@ void AppWindow::OnCreate()
 	void* shader_byte_code = nullptr;
 	UINT size_shader = 0;
 
-	GraphicsEngine::GetInstance()->GetShaderBufferAndSize(&shader_byte_code, &size_shader);
+	GraphicsEngine::GetInstance()->CompileVertexShader(L"VertexShader.hlsl", "vsmain", &shader_byte_code, &size_shader);
+
+	m_vertex_shader = GraphicsEngine::GetInstance()->CreateVertexShader(shader_byte_code, size_shader);
+
 
 	m_vertex_buffer->Load(vertex_list, sizeof(Vertex), size_vertex_list, shader_byte_code, size_shader);
+
+	//Release the compiled VS
+	GraphicsEngine::GetInstance()->ReleaseCompiledShader();
 
 }
 
@@ -67,6 +73,9 @@ void AppWindow::OnUpdate()
 	GraphicsEngine::GetInstance()->GetImmediateDeviceContext()->SetViewportSize(rc.right - rc.left, rc.bottom - rc.top);
 	//SET DEFAULT SHADER IN THE GRAPHICS PIPELINE TO BE ABLE TO DRAW
 	GraphicsEngine::GetInstance()->SetShaders();
+
+	GraphicsEngine::GetInstance()->GetImmediateDeviceContext()->SetVertexShader(m_vertex_shader);
+
 	//SET THE VERTICES OF THE TRIANGLE TO DRAW
 	GraphicsEngine::GetInstance()->GetImmediateDeviceContext()->SetVertexBuffer(m_vertex_buffer);
 

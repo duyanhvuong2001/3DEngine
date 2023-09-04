@@ -2,6 +2,7 @@
 #include <d3d11.h>
 class SwapChain;
 class VertexBuffer;
+class VertexShader;
 class DeviceContext
 {
 public:
@@ -12,6 +13,8 @@ public:
 	void DrawTriangleList(UINT vertex_count, UINT start_vertex_idx);
 	void DrawTriangleStrip(UINT vertex_count, UINT start_vertex_idx);
 	void SetViewportSize(UINT width, UINT height);
+
+	void SetVertexShader(VertexShader* vertex_shader);
 	~DeviceContext();
 private:
 	ID3D11DeviceContext* m_device_context;
