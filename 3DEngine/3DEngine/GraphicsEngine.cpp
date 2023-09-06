@@ -2,6 +2,7 @@
 #include "SwapChain.h"
 #include <d3dcompiler.h>
 #include "VertexShader.h"
+#include "PixelShader.h"
 
 using namespace std;
 
@@ -104,6 +105,17 @@ VertexShader* GraphicsEngine::CreateVertexShader(const void* shader_byte_code, s
 	
 }
 
+PixelShader* GraphicsEngine::CreatePixelShader(const void* shader_byte_code, size_t shader_byte_code_length)
+{
+	PixelShader* pixel_shader = new PixelShader();
+	if (!pixel_shader->Init(shader_byte_code, shader_byte_code_length)) {
+		pixel_shader->Release();
+		return nullptr;
+	}
+
+	return pixel_shader;
+}
+
 bool GraphicsEngine::CompileVertexShader(const wchar_t* file_name,const char* entry_point_name,void** shader_byte_code, size_t* byte_code_size)
 {
 	ID3DBlob* err_blob = nullptr;
@@ -117,7 +129,23 @@ bool GraphicsEngine::CompileVertexShader(const wchar_t* file_name,const char* en
 	}
 	*shader_byte_code = m_blob->GetBufferPointer();
 	*byte_code_size = m_blob->GetBufferSize();
-	return false;
+	return true;
+}
+
+bool GraphicsEngine::CompilePixelShader(const wchar_t* file_name, const char* entry_point_name, void** shader_byte_code, size_t* byte_code_size)
+{
+	ID3DBlob* err_blob = nullptr;
+	//Compile from file from D3DCompile Lib
+	if (!SUCCEEDED(D3DCompileFromFile(file_name, nullptr, nullptr, entry_point_name, "ps_5_0", 0, 0, &m_blob, &err_blob))) {
+		if (err_blob)
+		{
+			err_blob->Release();
+			return false;
+		}
+	}
+	*shader_byte_code = m_blob->GetBufferPointer();
+	*byte_code_size = m_blob->GetBufferSize();
+	return true;
 }
 
 void GraphicsEngine::ReleaseCompiledShader()
@@ -127,25 +155,6 @@ void GraphicsEngine::ReleaseCompiledShader()
 		m_blob->Release();
 	}
 }
-
-bool GraphicsEngine::CreateShaders()
-
-{
-	ID3DBlob* errblob = nullptr;
-	D3DCompileFromFile(L"shader.fx", nullptr, nullptr, "psmain", "ps_5_0", NULL, NULL, &m_psblob, &errblob);
-	m_d3d_device->CreatePixelShader(m_psblob->GetBufferPointer(), m_psblob->GetBufferSize(), nullptr, &m_ps);
-	return true;
-
-}
-
-
-bool GraphicsEngine::SetShaders()
-{
-	m_imm_context->PSSetShader(m_ps, nullptr, 0);
-	return true;
-}
-
-
 
 GraphicsEngine::~GraphicsEngine()
 {
