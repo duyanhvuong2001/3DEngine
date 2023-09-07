@@ -2,11 +2,14 @@
 #include <d3d11.h>
 #include "DeviceContext.h"
 #include "VertexBuffer.h"
+#include "ConstantBuffer.h"
+
 
 class SwapChain;
 class VertexBuffer;
 class VertexShader;
 class PixelShader;
+class ConstantBuffer;
 
 class GraphicsEngine
 {
@@ -25,6 +28,7 @@ public:
 	SwapChain* CreateSwapChain();
 	DeviceContext* GetImmediateDeviceContext();
 	VertexBuffer* CreateVertexBuffer();
+	ConstantBuffer* CreateConstantBuffer();
 	VertexShader* CreateVertexShader(const void* shader_byte_code,size_t shader_byte_code_length);
 	PixelShader* CreatePixelShader(const void* shader_byte_code, size_t shader_byte_code_length);
 	~GraphicsEngine();
@@ -51,6 +55,7 @@ private:
 	friend class VertexBuffer;
 	friend class VertexShader;
 	friend class PixelShader;
+	friend class ConstantBuffer;
 private:
 	ID3DBlob* m_blob = nullptr;
 

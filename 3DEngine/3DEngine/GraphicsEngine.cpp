@@ -2,6 +2,7 @@
 #include "SwapChain.h"
 #include <d3dcompiler.h>
 #include "VertexShader.h"
+
 #include "PixelShader.h"
 
 using namespace std;
@@ -91,6 +92,11 @@ DeviceContext* GraphicsEngine::GetImmediateDeviceContext()
 VertexBuffer* GraphicsEngine::CreateVertexBuffer()
 {
 	return new VertexBuffer();
+}
+
+ConstantBuffer* GraphicsEngine::CreateConstantBuffer()
+{
+	return new ConstantBuffer();
 }
 
 VertexShader* GraphicsEngine::CreateVertexShader(const void* shader_byte_code, size_t shader_byte_code_length)
