@@ -1,22 +1,28 @@
 #include "AppWindow.h"
 #include <Windows.h>
-__declspec(align(16)) //Convert to a chain of 16-bytes
+#include "Vector3D.h"
+#include "Matrix4x4.h"
+
+//Convert to a chain of 16-bytes
+__declspec(align(16)) 
 struct Constant {
-	unsigned int time;
+	
+	Matrix4x4 m_world;
+	Matrix4x4 m_view;
+	Matrix4x4 m_projection;
+	unsigned int m_time;
 };
 
 
 //Vector in 3D space
-struct Vector3 {
-	float x, y, z;
-};
+
 
 
 struct Vertex {
-	Vector3 position;
-	Vector3 position1;
-	Vector3 color;
-	Vector3 color1;
+	Vector3D position;
+	Vector3D position1;
+	Vector3D color;
+	Vector3D color1;
 };
 
 
@@ -41,11 +47,10 @@ void AppWindow::OnCreate()
 
 	Vertex vertex_list[] = 
 	{
-		{-0.5f,-0.5f,0.0f,     -0.32f, -0.11f, 0.0f,     1,0,0,		0,1,0}, //POS 1
-		{-0.5f,0.5f,0.0f,      -0.11f, 0.78f, 0.0f,    0,1,0,		1,0,1}, //POS 2
-		{0.5f,-0.5f,0.0f,      0.75f,-0.73f,0.0f,      0,0,1,		0,0.5,1}, //POS 3
-		
-		{0.5f,0.5f,0.0f,		0.88f,0.77f,0.0f,        1,1,0,		1,1,0.5}, //POS 4
+		{Vector3D(-0.5f,-0.5f,0.0f),	Vector3D(-0.32f, -0.11f, 0.0f),		Vector3D(1,0,0),		Vector3D(0,1,0)}, //POS 1
+		{Vector3D(-0.5f,0.5f,0.0f),		Vector3D(-0.11f, 0.78f, 0.0f),		Vector3D(0,1,0),		Vector3D(1,0,1)}, //POS 2
+		{Vector3D(0.5f,-0.5f,0.0f),		Vector3D(0.75f,-0.73f,0.0f),		Vector3D(0,0,1),		Vector3D(0,0.5f,1)}, //POS 3
+		{Vector3D(0.5f,0.5f,0.0f),		Vector3D(0.88f,0.77f,0.0f),			Vector3D(1,1,0),		Vector3D(1,1,0.5)} //POS 4
 		
 		
 	};
@@ -76,11 +81,11 @@ void AppWindow::OnCreate()
 
 	//Create new constant obj
 	Constant cons;
-	cons.time = 0;
+	cons.m_time = 0;
 
 	//Create ConstantBuffer
 	m_constant_buffer = GraphicsEngine::GetInstance()->CreateConstantBuffer();
-	//Load the time attribute to the constant buffer
+	//Load the m_time attribute to the constant buffer
 	m_constant_buffer->Load(&cons, sizeof(cons));
 
 }
@@ -89,16 +94,13 @@ void AppWindow::OnUpdate()
 {
 	Window::OnUpdate();
 	//CLEAR THE RENDER TARGET 
-	GraphicsEngine::GetInstance()->GetImmediateDeviceContext()->ClearRenderTargetColor(this->m_swap_chain,0, 0.4f, 0.2f, 1.0f);
+	GraphicsEngine::GetInstance()->GetImmediateDeviceContext()->ClearRenderTargetColor(this->m_swap_chain,0, 0.4f, 0.3f, 1.0f);
 	//SET VIEWPORT OF RENDER TARGET IN WHICH WE HAVE TO DRAW
 	RECT rc = this->GetClientWindowRect();
 	GraphicsEngine::GetInstance()->GetImmediateDeviceContext()->SetViewportSize(rc.right - rc.left, rc.bottom - rc.top);
 
-	//Create new constant
-	Constant cons;
-	cons.time = ::GetTickCount64();
-
-	m_constant_buffer->Update(GraphicsEngine::GetInstance()->GetImmediateDeviceContext(), &cons);
+	//Update quad position
+	UpdateQuadPosition();
 
 	//Bind the constant buffer to the graphic pipeline
 	GraphicsEngine::GetInstance()->GetImmediateDeviceContext()->SetConstantBuffer(m_vertex_shader, m_constant_buffer);
@@ -117,6 +119,15 @@ void AppWindow::OnUpdate()
 	// FINALLY DRAW THE TRIANGLE
 	GraphicsEngine::GetInstance()->GetImmediateDeviceContext()->DrawTriangleStrip(m_vertex_buffer->GetSizeVertexList(), 0);
 	m_swap_chain->Present(true);
+	
+	//Update old delta
+	m_delta_old = m_delta_new;
+
+	//Get new delta
+	m_delta_new = ::GetTickCount64();
+
+	//Calculate delta time
+	m_delta_time = (m_delta_old)?((m_delta_new - m_delta_old)/1000.0f):0;
 }
 
 void AppWindow::OnDestroy()
@@ -128,4 +139,47 @@ void AppWindow::OnDestroy()
 	m_pixel_shader->Release();
 	m_vertex_shader->Release();
 	GraphicsEngine::GetInstance()->Release();
+}
+
+void AppWindow::UpdateQuadPosition()
+{
+	//Create new constant
+	Constant cons;
+
+	//Get the runtime current tick
+	cons.m_time = ::GetTickCount64();
+
+	m_delta_pos += m_delta_time * 0.8f;
+	
+	//if (m_delta_pos > 1.0f) {
+	//	m_delta_pos = 0;
+	//}
+
+	////Set translate
+	//cons.m_world.setTranslation(Vector3D::Lerp(Vector3D(0,-2,0),Vector3D(0,3,0),m_delta_pos));
+
+	
+	//Set scale
+	m_delta_scale += m_delta_time * 0.4f;
+	Matrix4x4 temp;
+	cons.m_world.setScale(Vector3D::Lerp(Vector3D(1, 1, 0), Vector3D(2, 2, 0), (sin(m_delta_scale)+1)/2.0f));
+
+	
+	temp.setTranslation(Vector3D::Lerp(Vector3D(0, 0, 0), Vector3D(0, 1, 0), (sin(m_delta_pos) + 1) / 2.0f));
+
+	cons.m_world *= temp;
+
+	//Set view matrix
+	cons.m_view.setIdentity();
+
+	//Set projection matrix
+	RECT clientWindow = this->GetClientWindowRect();
+
+	cons.m_projection.setOrthoLH(
+		(clientWindow.right - clientWindow.left)/400.0f,
+		(clientWindow.bottom - clientWindow.top)/400.0f, 
+		-4.0f, 
+		4.0f);
+
+	m_constant_buffer->Update(GraphicsEngine::GetInstance()->GetImmediateDeviceContext(), &cons);
 }

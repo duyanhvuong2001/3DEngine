@@ -25,5 +25,16 @@ private:
 	VertexShader* m_vertex_shader;
 	PixelShader* m_pixel_shader;
 	ConstantBuffer* m_constant_buffer;
+public:
+	//Public Methods
+	void UpdateQuadPosition();
+private:
+//Time properties
+	float m_delta_old;
+	float m_delta_new;
+	float m_delta_time;
+
+	float m_delta_pos;
+	float m_delta_scale;
 };
 
