@@ -2,7 +2,6 @@
 #include "SwapChain.h"
 #include <d3dcompiler.h>
 #include "VertexShader.h"
-
 #include "PixelShader.h"
 
 using namespace std;
@@ -120,6 +119,11 @@ PixelShader* GraphicsEngine::CreatePixelShader(const void* shader_byte_code, siz
 	}
 
 	return pixel_shader;
+}
+
+IndexBuffer* GraphicsEngine::CreateIndexBuffer()
+{
+	return new IndexBuffer();
 }
 
 bool GraphicsEngine::CompileVertexShader(const wchar_t* file_name,const char* entry_point_name,void** shader_byte_code, size_t* byte_code_size)

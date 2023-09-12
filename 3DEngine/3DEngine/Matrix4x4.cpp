@@ -1,6 +1,6 @@
 #include "Matrix4x4.h"
 
-void Matrix4x4::setIdentity()
+void Matrix4x4::SetIdentity()
 {
 	//Filling matrix with zeroes
 	::memset(m_matrix, 0, sizeof(float)*16);
@@ -12,17 +12,17 @@ void Matrix4x4::setIdentity()
 	m_matrix[3][3] = 1;
 }
 
-void Matrix4x4::setScale(const Vector3D& scale)
+void Matrix4x4::SetScale(const Vector3D& scale)
 {
-	setIdentity();
+	SetIdentity();
 	m_matrix[0][0] = scale.X();
 	m_matrix[1][1] = scale.Y();
 	m_matrix[2][2] = scale.Z();
 }
 
-void Matrix4x4::setTranslation(const Vector3D& vec)
+void Matrix4x4::SetTranslation(const Vector3D& vec)
 {
-	setIdentity();
+	SetIdentity();
 	//Set all values in the last row to translation vector's coordinates
 	m_matrix[3][0] = vec.X();
 	m_matrix[3][1] = vec.Y();
@@ -31,13 +31,41 @@ void Matrix4x4::setTranslation(const Vector3D& vec)
 
 
 
-void Matrix4x4::setOrthoLH(float width, float height, float near_plane, float far_plane)
+void Matrix4x4::SetOrthoLH(float width, float height, float near_plane, float far_plane)
 {
-	setIdentity();
+	SetIdentity();
 	m_matrix[0][0] = 2.0f / width;
 	m_matrix[1][1] = 2.0f / height;
 	m_matrix[2][2] = 1.0f / (far_plane - near_plane);
 	m_matrix[3][2] = -(near_plane / (far_plane - near_plane));
+}
+
+void Matrix4x4::SetRotationX(float phi)
+{
+	SetIdentity();
+	m_matrix[1][1] = cos(phi);
+	m_matrix[1][2] = sin(phi);
+	m_matrix[2][1] = -sin(phi);
+	m_matrix[2][2] = cos(phi);
+}
+
+void Matrix4x4::SetRotationY(float phi)
+{
+	SetIdentity();
+	m_matrix[0][0] = cos(phi);
+	m_matrix[0][1] = sin(phi);
+	m_matrix[1][0] = -sin(phi);
+	m_matrix[1][1] = cos(phi);
+
+}
+
+void Matrix4x4::SetRotationZ(float phi)
+{
+	SetIdentity();
+	m_matrix[0][0] = cos(phi);
+	m_matrix[0][2] = -sin(phi);
+	m_matrix[2][0] = sin(phi);
+	m_matrix[2][2] = cos(phi);
 }
 
 void Matrix4x4::operator*=(const Matrix4x4& other_mat)

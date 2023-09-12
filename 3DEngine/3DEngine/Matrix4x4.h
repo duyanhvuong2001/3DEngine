@@ -14,11 +14,14 @@ public:
 
 	};
 public:
-	void setIdentity();
-	void setScale(const Vector3D& scale);
-	void setTranslation(const Vector3D& vec);
-	void setOrthoLH(float width, float height, float near_plane, float far_plane);
-
+	void SetIdentity();
+	void SetScale(const Vector3D& scale);
+	void SetTranslation(const Vector3D& vec);
+	void SetOrthoLH(float width, float height, float near_plane, float far_plane);
+	
+	void SetRotationX(float phi);
+	void SetRotationY(float phi);
+	void SetRotationZ(float phi);
 	//Operator modification
 	void operator*=(const Matrix4x4& mat);
 private:

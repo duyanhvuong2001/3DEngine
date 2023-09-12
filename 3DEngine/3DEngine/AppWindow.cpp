@@ -20,7 +20,6 @@ struct Constant {
 
 struct Vertex {
 	Vector3D position;
-	Vector3D position1;
 	Vector3D color;
 	Vector3D color1;
 };
@@ -47,10 +46,18 @@ void AppWindow::OnCreate()
 
 	Vertex vertex_list[] = 
 	{
-		{Vector3D(-0.5f,-0.5f,0.0f),	Vector3D(-0.32f, -0.11f, 0.0f),		Vector3D(1,0,0),		Vector3D(0,1,0)}, //POS 1
-		{Vector3D(-0.5f,0.5f,0.0f),		Vector3D(-0.11f, 0.78f, 0.0f),		Vector3D(0,1,0),		Vector3D(1,0,1)}, //POS 2
-		{Vector3D(0.5f,-0.5f,0.0f),		Vector3D(0.75f,-0.73f,0.0f),		Vector3D(0,0,1),		Vector3D(0,0.5f,1)}, //POS 3
-		{Vector3D(0.5f,0.5f,0.0f),		Vector3D(0.88f,0.77f,0.0f),			Vector3D(1,1,0),		Vector3D(1,1,0.5)} //POS 4
+		//X - Y - Z
+		//Front face vertices
+		{Vector3D(-0.5f,-0.5f,-0.5f),			Vector3D(1,0,0),		Vector3D(0,1,0)}, //IDX 0
+		{Vector3D(-0.5f,0.5f,-0.5f),				Vector3D(0,1,0),		Vector3D(1,0,1)}, //IDX 1
+		{Vector3D(0.5f,0.5f,-0.5f),				Vector3D(0,0,1),		Vector3D(0,0.5f,1)}, //IDX 2
+		{Vector3D(0.5f,-0.5f,-0.5f),				Vector3D(1,1,0),		Vector3D(1,1,0.5)}, //IDX 3
+
+		//Rear face vertices
+		{Vector3D(0.5f,-0.5f,0.5f),				Vector3D(1,1,0),		Vector3D(1,1,0.5)}, //IDX 4
+		{Vector3D(0.5f,0.5f,0.5f),				Vector3D(1,1,0),		Vector3D(1,1,0.5)}, //IDX 5
+		{Vector3D(-0.5f,0.5f,0.5f),				Vector3D(1,1,0),		Vector3D(1,1,0.5)},//IDX 6
+		{Vector3D(-0.5f,-0.5f,0.5f),				Vector3D(1,1,0),		Vector3D(1,1,0.5)} //IDX 7
 		
 		
 	};
@@ -58,6 +65,34 @@ void AppWindow::OnCreate()
 	m_vertex_buffer = GraphicsEngine::GetInstance()->CreateVertexBuffer();
 
 	UINT size_vertex_list = ARRAYSIZE(vertex_list);
+
+	unsigned int index_list[] = {
+		//FRONT SIDE
+		0,1,2,	//1ST TRIANGLE
+		2,3,0,	//2ND TRIANGLE
+		//REAR SIDE
+		4,5,6, 
+		6,7,4,
+		//TOP SIDE
+		1,6,5,
+		5,2,1,
+		//BOTTOM SIDE
+		7,0,3,
+		3,4,7,
+		//RIGHT SIDE
+		3,2,5,
+		5,4,3,
+		//LEFT SIDE
+		7,6,1,
+		1,0,7
+	};
+
+	m_index_buffer = GraphicsEngine::GetInstance()->CreateIndexBuffer();
+
+	UINT size_index_list = ARRAYSIZE(index_list);
+
+	m_index_buffer->Load(index_list, size_index_list);
+
 
 	void* shader_byte_code = nullptr;
 	UINT size_shader = 0;
@@ -116,8 +151,10 @@ void AppWindow::OnUpdate()
 	//SET THE VERTICES OF THE TRIANGLE TO DRAW
 	GraphicsEngine::GetInstance()->GetImmediateDeviceContext()->SetVertexBuffer(m_vertex_buffer);
 
+	//Set the index buffer for rendering triangles
+	GraphicsEngine::GetInstance()->GetImmediateDeviceContext()->SetIndexBuffer(m_index_buffer);
 	// FINALLY DRAW THE TRIANGLE
-	GraphicsEngine::GetInstance()->GetImmediateDeviceContext()->DrawTriangleStrip(m_vertex_buffer->GetSizeVertexList(), 0);
+	GraphicsEngine::GetInstance()->GetImmediateDeviceContext()->DrawIndexedTriangleList(m_index_buffer->GetSizeIndexList(), 0, 0);
 	m_swap_chain->Present(true);
 	
 	//Update old delta
@@ -134,6 +171,8 @@ void AppWindow::OnDestroy()
 {
 	//Release all resources on destroy
 	Window::OnDestroy();
+	m_constant_buffer->Release();
+	m_index_buffer->Release();
 	m_vertex_buffer->Release();
 	m_swap_chain->Release();
 	m_pixel_shader->Release();
@@ -149,35 +188,48 @@ void AppWindow::UpdateQuadPosition()
 	//Get the runtime current tick
 	cons.m_time = ::GetTickCount64();
 
+	//Set delta position
 	m_delta_pos += m_delta_time * 0.8f;
-	
-	//if (m_delta_pos > 1.0f) {
-	//	m_delta_pos = 0;
-	//}
 
-	////Set translate
-	//cons.m_world.setTranslation(Vector3D::Lerp(Vector3D(0,-2,0),Vector3D(0,3,0),m_delta_pos));
-
-	
-	//Set scale
+	//Set delta scale
 	m_delta_scale += m_delta_time * 0.4f;
-	Matrix4x4 temp;
-	cons.m_world.setScale(Vector3D::Lerp(Vector3D(1, 1, 0), Vector3D(2, 2, 0), (sin(m_delta_scale)+1)/2.0f));
 
-	
-	temp.setTranslation(Vector3D::Lerp(Vector3D(0, 0, 0), Vector3D(0, 1, 0), (sin(m_delta_pos) + 1) / 2.0f));
+
+	//World matrix operations
+	cons.m_world.SetScale(Vector3D(1, 1, 1));
+
+	Matrix4x4 temp;
+
+	temp.SetRotationZ(m_delta_scale);
 
 	cons.m_world *= temp;
 
-	//Set view matrix
-	cons.m_view.setIdentity();
+	temp.SetRotationY(m_delta_scale);
+
+	cons.m_world *= temp;
+
+	temp.SetRotationX(m_delta_scale);
+
+	cons.m_world *= temp;
+
+	//cons.m_world.setScale(Vector3D::Lerp(Vector3D(1, 1, 0), Vector3D(2, 2, 0), (sin(m_delta_scale)+1)/2.0f));
+
+	//
+	//temp.setTranslation(Vector3D::Lerp(Vector3D(-1, -1, 0), Vector3D(0, 1, 0), (sin(m_delta_pos) + 1) / 2.0f));
+
+	//cons.m_world *= temp;
+
+
+
+	//View matrix operations
+	cons.m_view.SetIdentity();
 
 	//Set projection matrix
 	RECT clientWindow = this->GetClientWindowRect();
 
-	cons.m_projection.setOrthoLH(
-		(clientWindow.right - clientWindow.left)/400.0f,
-		(clientWindow.bottom - clientWindow.top)/400.0f, 
+	cons.m_projection.SetOrthoLH(
+		(clientWindow.right - clientWindow.left)/200.0f,
+		(clientWindow.bottom - clientWindow.top)/200.0f, 
 		-4.0f, 
 		4.0f);
 

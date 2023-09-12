@@ -23,7 +23,7 @@ bool ConstantBuffer::Load(void* buffer, UINT size_of_buffer)
 	D3D11_SUBRESOURCE_DATA init_data = {};
 	init_data.pSysMem = buffer;
 
-	//Create the vertex buffer
+	//Create the constant buffer
 	HRESULT res = GraphicsEngine::GetInstance()->m_d3d_device->CreateBuffer(&buffer_desc, &init_data, &m_buffer);
 	if (FAILED(res)) {
 

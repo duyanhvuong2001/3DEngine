@@ -3,6 +3,7 @@
 #include "DeviceContext.h"
 #include "VertexBuffer.h"
 #include "ConstantBuffer.h"
+#include "IndexBuffer.h"
 
 
 class SwapChain;
@@ -10,6 +11,7 @@ class VertexBuffer;
 class VertexShader;
 class PixelShader;
 class ConstantBuffer;
+class IndexBuffer;
 
 class GraphicsEngine
 {
@@ -31,6 +33,7 @@ public:
 	ConstantBuffer* CreateConstantBuffer();
 	VertexShader* CreateVertexShader(const void* shader_byte_code,size_t shader_byte_code_length);
 	PixelShader* CreatePixelShader(const void* shader_byte_code, size_t shader_byte_code_length);
+	IndexBuffer* CreateIndexBuffer();
 	~GraphicsEngine();
 private:
 	ID3D11Device* m_d3d_device;
@@ -56,6 +59,7 @@ private:
 	friend class VertexShader;
 	friend class PixelShader;
 	friend class ConstantBuffer;
+	friend class IndexBuffer;
 private:
 	ID3DBlob* m_blob = nullptr;
 

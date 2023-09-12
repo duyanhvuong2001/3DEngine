@@ -7,7 +7,7 @@
 #include "VertexShader.h"
 #include "PixelShader.h"
 #include "ConstantBuffer.h"
-
+#include "IndexBuffer.h"
 
 class AppWindow : public Window
 {
@@ -25,6 +25,7 @@ private:
 	VertexShader* m_vertex_shader;
 	PixelShader* m_pixel_shader;
 	ConstantBuffer* m_constant_buffer;
+	IndexBuffer* m_index_buffer;
 public:
 	//Public Methods
 	void UpdateQuadPosition();
